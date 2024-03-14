@@ -83,16 +83,28 @@ PreImageOfPW2=" "
 # Please implement the following two functions as part of your answer to (b)
 # DSA signature function, p, q, g, k, sk are integers, Message are hex strings of even length.
 def Sign( p, q, g, k, sk, Message ):
-
+	# h(m) = −xr + ks mod q
 
 	return r,s
 
 # DSA verification function,  p, q, g, k, pk are integers, Message are hex strings of even length.
 def Verify( p, q, g, pk, Message, r, s ):
+	if(r >= 0 or r >= q or s<= or s >= q):
+		return False
 
+	# u = h(m)s−1 mod q
+	# v = rs−1 mod q
+	# w = guyv
 
-
+	s_inv = inverse of s 
+	v = r * s_inv % p
+	w = pow(g, u)*pow(pk,v)
 	if ( ):
 		return True
 	else:   
 		return False
+
+# to convert between hexstring and decimal int
+# int(hex_string, 16)
+
+# hex(decimal_int)
