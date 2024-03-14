@@ -48,3 +48,131 @@ initial state is loaded as GPS time when the user starts the program of DSA and 
 224 clock cycles without output, then a 224-bit pseudorandom number will be a binary
 number given by the concatenation of the 224th state and 225th state. Show a possible
 attack that Attacker can steal a victim’s Bitcoin with a sound probability.
+
+## First draft :
+
+Proof of Work : for each transaction : 
+
+hash chain of length 3 (1 block = 1 transaction)
+The 3 transactions :
+1. 
+amt_0 = 5 BTC → 0x05
+amt_1 = 4 BTC → 0x04
+amt_2 = 3 BTC → 0x03
+
+### implement DSA 112-bit security
+1. checkparameters : A1, A2, A3
+
+
+
+### user :
+
+### miner : 
+compute sig i and pw i
+
+python DSA library for testing
+
+sha3-224 
+
+## 4 
+# 4.A
+The 3 criterie are :
+- A1. p: a prime number lying between 1024 and 2048 bits
+- A2. q: a 224-bit prime factor of p − 1
+- A3. g: an element g ∈ Fp with order q
+
+At first I thought about writing my own code for these tests, like : 
+```py
+def is_prime(num):
+    for i in range(2, ceil(sqrt(num))):
+        if num % i == 0:
+            return False
+    return True
+```
+But python was not happy about it : `OverflowError: int too large to convert to float`
+
+So I decided to use the library: `pycryptodome`. In particular the [util.number](https://pythonhosted.org/pycrypto/Crypto.Util.number-module.html) module provides useful functions like `size`, `isPrime`
+
+as well as the `pow` function from the standard python library
+
+source code :   
+
+```py
+from Crypto.Util import number as n
+
+p= ...
+q= ...
+g= ...
+
+print(f"n.size(p)    : {n.size(p)} bits.")
+print(f"n.isPrime(p) : {n.isPrime(p)}")
+print(f"n.size(q)    : {n.size(q)} bits.")
+print(f"(p-1) % q    : {(p-1) % q}")
+print(f"n.isPrime(q) : {n.isPrime(q)}")
+print(f"pow(g, q, p) : {pow(g, q, p)}")
+```
+result :   
+
+```py
+n.size(p)    : 2048 bits.
+n.isPrime(p) : True
+n.size(q)    : 224 bits.
+(p-1) % q    : 0
+n.isPrime(q) : True
+pow(g, q, p) : 1
+```
+
+p,q and g verify the 3 criteria.
+
+Here is the code used to compute the prime factorization of p-1:
+
+```py
+from Crypto.Util import number as n
+def factorise(num, prime_factors, next_factor):
+    if n.isPrime(num):
+        prime_factors.append(num)
+        return prime_factors
+
+    if next_factor != 1:
+        prime_factors.append(next_factor)
+        return factorise(num // next_factor, prime_factors, 1)
+    
+    # order of magnitude of square root
+    approx_sqrt_num = pow(2, n.size(num) // 2)
+    # run 3 iterations of Newtons method for approximation square root
+    for i in range(3):
+        approx_sqrt_num = (approx_sqrt_num**2 + num) // 2*approx_sqrt_num
+
+    # find next factor
+    for i in range(2, approx_sqrt_num + 1):
+        if num % i == 0:
+            return factorise(num, prime_factors, i)
+    
+    # error : num is not prime but has no factor
+    return [-1]
+```
+
+and to verify the factorization : 
+```py
+from Crypto.Util import number as n
+from functools import reduce
+import operator
+
+def check_factorization(factors, product):
+    for f in factors:
+        if not n.isPrime(f):
+            print(f"factor {f} is not prime")
+            return False
+    
+    return reduce(operator.mul, factors, 1) == product
+```
+
+which gave:
+```py
+factorisation of p-1 : 
+[13479974306915323548855049186344013292925286365246579443817723220231, 2, 599352188457547639693740171522680835865322184075286620256386716439921029334782998562008313995103840817116953210359643511447372101221464995653177706653918911634015555633001801773590292023083604552613918655194669929368962688659673544061885990566694774938089095597940505443430714573194211134223784784744939911387314440899638056016474270609853063142638329500429039904897328933858412897374253962878313102199163400319655392723027703101354927814377851954345336880097584669598515815463134218486896858352351187255794957262790967727451704317515673833695348341]
+```
+
+
+TODO :
+Explain why we only pick sk1 as a number less than 224 bits. Compute pki, i = 1, 2, 3.
