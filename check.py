@@ -51,4 +51,16 @@ def check_factorization(factors, product):
 
 fact_pminus1 = factorise(p-1, [], q)
 print(f"correct factorization : {check_factorization(fact_pminus1, p-1)}")
-print(f"factorisation of p-1 : \n {fact_pminus1}")
+print(f"factorisation of p-1  : \n {fact_pminus1}")
+
+
+sk1=10046861250588975243499176841186459239945252023965781404474235095048
+sk2=11322232591408348876653279113214212884960271456737992898057963082182
+sk3=5530230574242822098028164317251993858819889375005228545746444961699
+
+def pk(sk):
+    return pow(g, sk, p)
+
+print (f"pk1         : {pk(sk1)}")
+print (f"pk2         : {pk(sk2)}")
+print (f"pk3         : {pk(sk3)}")
